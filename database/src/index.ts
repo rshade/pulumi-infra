@@ -16,8 +16,10 @@ const finalSnapshotIdentifier = config.get("finalSnapshotIdentifier")
 }).result;
 
 const networkingStack = new StackReference(config.require("networkingStack"))
+const dbAppSecurityGroup = new aws.ec2.SecurityGroup("dbAppAccessGroup", {
+    vpcId: networkingStack.getOutput("vpcId"),
+})
 
-const dbSecurityGroup = new aws.ec2.SecurityGroup("database")
 const baseTags = {
     Project: "Pulumi Demo",
     PulumiStack: getStack(),
@@ -34,8 +36,8 @@ const rds = new RdsInstance("db-instance", {
     initalDbName: dbName,
 
     allocatedStorage: 40,
-    engineVersion: "11.4",
-    instanceClass: aws.rds.InstanceTypes.R3_Large,
+    engineVersion: "8.0.28",
+    instanceClass: "db.t4g.medium",
     storageType: "gp2",
 
     finalSnapshotIdentifier: finalSnapshotIdentifier,
@@ -43,9 +45,10 @@ const rds = new RdsInstance("db-instance", {
     sendEnhancedLogsToCloudwatch: true,
     monitoringInterval: 10,
 
-    securityGroupIds: [dbSecurityGroup.id],
+    securityGroupIds: [dbAppSecurityGroup.id],
 });
 
+export const dbAppSecurityGroupId = dbAppSecurityGroup.id;
 export const dbEndpoint = rds.instanceEndpoint();
 export const dbPort = rds.instancePort();
 export const dbAddress = rds.instanceAddress();

@@ -1,2 +1,4 @@
 config:
-  aws:region: us-east-1
+  aws:region: us-east-2
+  kubernetes:networkingStack: richard-shade/network/dev
+  kubernetes:databaseStack: richard-shade/database/dev
